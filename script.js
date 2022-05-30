@@ -36,23 +36,23 @@ const countriesContainer = document.querySelector('.countries');
 // const renderError = function (msg) {
 //   countriesContainer.insertAdjacentText('beforeend', msg);
 // };
-const renderCountry = function (data, className = '') {
-  const html = `<article class="country ${className}">
-          <img class="country__img" src=${data.flag} />
-          <div class="country__data">
-            <h3 class="country__name">${data.name}</h3>
-            <h4 class="country__region">${data.region}</h4>
-            <p class="country__row"><span>👫</span>${(
-              +data.population / 1000000
-            ).toFixed(1)} mln</p>
-            <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
-            <p class="country__row"><span>💰</span>${
-              data.currencies[0].name
-            }</p>
-          </div>
-        </article>`;
-  countriesContainer.insertAdjacentHTML('beforeend', html);
-};
+// const renderCountry = function (data, className = '') {
+//   const html = `<article class="country ${className}">
+//           <img class="country__img" src=${data.flag} />
+//           <div class="country__data">
+//             <h3 class="country__name">${data.name}</h3>
+//             <h4 class="country__region">${data.region}</h4>
+//             <p class="country__row"><span>👫</span>${(
+//               +data.population / 1000000
+//             ).toFixed(1)} mln</p>
+//             <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
+//             <p class="country__row"><span>💰</span>${
+//               data.currencies[0].name
+//             }</p>
+//           </div>
+//         </article>`;
+//   countriesContainer.insertAdjacentHTML('beforeend', html);
+// };
 
 // const getCountryAndNeighbour = function (country) {
 //   //AJAX call country 1
@@ -155,48 +155,89 @@ TEST COORDINATES 2: -33.933, 18.474
 
 GOOD LUCK 😀
 */
-const fetchData = function (url, errorMsg = 'Something went wrong!') {
-  return fetch(url).then(response => {
-    console.log(response);
-    if (!response.ok) {
-      throw new Error(` ${errorMsg} (${response.status})`);
+// const fetchData = function (url, errorMsg = 'Something went wrong!') {
+//   return fetch(url).then(response => {
+//     console.log(response);
+//     if (!response.ok) {
+//       throw new Error(` ${errorMsg} (${response.status})`);
+//     }
+//     return response.json();
+//   });
+// };
+// const renderError = function (msg) {
+//   console.log(`${msg}`);
+//   countriesContainer.insertAdjacentText('beforeend', msg);
+// };
+
+// const whereAmI = function (lat, lng, errorMsg = 'Smoething went wrong') {
+//   return (
+//     fetchData(
+//       `https://geocode.xyz/${lat},${lng}?geoit=json`,
+//       'Too many requests'
+//     )
+//       // fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`)
+//       //   .then(response => {
+//       //     console.log(response);
+//       //     if (!response.ok)
+//       //       throw new Error(` ${errorMsg},
+//       //       (${response.status}),
+//       //       `);
+//       //     return response.json();
+//       //   })
+//       .then(data => {
+//         if (data.error)
+//           throw new Error(`${data.error.description}  (${data.error.code})`);
+
+//         const country = data.country;
+//         return fetchData(
+//           `https://restcountries.com/v2/name/${country}`,
+//           'Country not found'
+//         );
+//       })
+//       .then(data => renderCountry(data[0]))
+//       .catch(err => renderError(`${err.message}`))
+//       .finally((countriesContainer.style.opacity = 1))
+//   );
+// };
+// whereAmI(19.037, 72.873);
+
+//EVENT LOOP PRACTICE
+// console.log('test start');
+// setTimeout(() => {
+//   console.log('0 sec set timeout');
+// }, 0);
+// Promise.resolve('Resolved promise 1').then(resp => console.log(resp));
+// Promise.resolve('Resolved promise 2').then(res => {
+//   for (let i = 0; i < 1000; i++) {}
+//   console.log(res);
+// });
+// console.log('test end');
+
+///// BUILDING OWN PROMISE
+
+const lotteryPromise = new Promise(function (resolve, reject) {
+  console.log('LOTTERY DRAW IS HAPPENING');
+
+  setTimeout(() => {
+    if (Math.random() >= 0.5) {
+      resolve('You Win');
+    } else {
+      reject(new Error('you lost'));
     }
-    return response.json();
+  }, 2000);
+});
+lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+//Promisifying setTimeout
+const wait = function (seconds) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, seconds * 1000);
   });
 };
-const renderError = function (msg) {
-  console.log(`${msg}`);
-  countriesContainer.insertAdjacentText('beforeend', msg);
-};
-
-const whereAmI = function (lat, lng, errorMsg = 'Smoething went wrong') {
-  return (
-    fetchData(
-      `https://geocode.xyz/${lat},${lng}?geoit=json`,
-      'Too many requests'
-    )
-      // fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`)
-      //   .then(response => {
-      //     console.log(response);
-      //     if (!response.ok)
-      //       throw new Error(` ${errorMsg},
-      //       (${response.status}),
-      //       `);
-      //     return response.json();
-      //   })
-      .then(data => {
-        if (data.error)
-          throw new Error(`${data.error.description}  (${data.error.code})`);
-
-        const country = data.country;
-        return fetchData(
-          `https://restcountries.com/v2/name/${country}`,
-          'Country not found'
-        );
-      })
-      .then(data => renderCountry(data[0]))
-      .catch(err => renderError(`${err.message}`))
-      .finally((countriesContainer.style.opacity = 1))
-  );
-};
-whereAmI(19.037, 72.873);
+wait(2)
+  .then(() => {
+    console.log('I waited 2 sec');
+    return wait(1);
+  })
+  .then(() => {
+    console.log('I waited 1 sec');
+  });
