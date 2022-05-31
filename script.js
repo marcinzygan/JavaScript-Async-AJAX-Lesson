@@ -310,56 +310,80 @@ TEST DATA: Images in the img folder. Test the error handler by passing a wrong i
 
 GOOD LUCK 😀
 */
-let img;
-const image = document.querySelector('.images');
+// let img;
+// const image = document.querySelector('.images');
 
-const wait = function (seconds) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, seconds * 1000);
-  });
-};
+// const wait = function (seconds) {
+//   return new Promise(function (resolve) {
+//     setTimeout(resolve, seconds * 1000);
+//   });
+// };
 
-const createImage = function (imgPath) {
+// const createImage = function (imgPath) {
+//   return new Promise((resolve, reject) => {
+//     img = document.createElement('img');
+//     img.src = imgPath;
+//     img.addEventListener('load', function () {
+//       image.appendChild(img);
+
+//       resolve(img);
+//     });
+//     img.addEventListener('error', function () {
+//       reject(new Error('IMG not found'));
+//     });
+//   });
+// };
+// createImage('../img/img-1.jpg')
+//   .then(img => {
+//     console.log('Loaded img 1');
+//     return wait(2);
+//   })
+//   .then(() => {
+//     console.log('waited 2 sec');
+//     img.style.display = 'none';
+//   })
+//   .then(() => {
+//     return createImage('../img/img-2.jpg');
+//   })
+//   .then(() => {
+//     return wait(2);
+//   })
+//   .then(() => {
+//     console.log('waited another 2 sec');
+//     img.style.display = 'none';
+//   })
+//   .then(() => {
+//     return createImage('../img/img-3.jpg');
+//   })
+//   .catch(err => console.error(err));
+
+//////////// ASYNC AWAIT ///////////
+
+const getCurrentPosition = function () {
   return new Promise((resolve, reject) => {
-    img = document.createElement('img');
-    img.src = imgPath;
-    img.addEventListener('load', function () {
-      image.appendChild(img);
-
-      resolve(img);
-    });
-    img.addEventListener('error', function () {
-      reject(new Error('IMG not found'));
-    });
+    navigator.geolocation.getCurrentPosition(resolve, reject);
   });
 };
-createImage('../img/img-1.jpg')
-  .then(img => {
-    console.log('Loaded img 1');
-    return wait(2);
-  })
-  .then(() => {
-    console.log('waited 2 sec');
-    img.style.display = 'none';
-  })
-  .then(() => {
-    return createImage('../img/img-2.jpg');
-  })
-  .then(() => {
-    return wait(2);
-  })
-  .then(() => {
-    console.log('waited another 2 sec');
-    img.style.display = 'none';
-  })
-  .then(() => {
-    return createImage('../img/img-3.jpg');
-  })
-  .catch(err => console.error(err));
-// .then((img.style.display = 'none'));
-// .then(createImage('../img/img-2.jpg'))
-// .then(() => console.log('waited another 2sec'))
-// .then((img.style.display = 'none'))
-// .then(createImage('../img/img-3.jpg'));
 
-// .catch(err => console.log(err));
+const whereAmI = async function () {
+  try {
+    const position = await getCurrentPosition();
+    const { latitude: lat, longitude: lng } = position.coords;
+    const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+    if (!resGeo.ok) throw new Error('Problem with location data');
+    const dataGeo = await resGeo.json();
+    console.log(dataGeo);
+
+    const res = await fetch(
+      `https://restcountries.com/v2/name/${dataGeo.country}`
+    );
+    if (!res.ok) throw new Error('Could not find country');
+    const data = await res.json();
+    console.log(data);
+    renderCountry(data[0]);
+    countriesContainer.style.opacity = 1;
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+whereAmI();
